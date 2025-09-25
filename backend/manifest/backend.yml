@@ -1,0 +1,61 @@
+name: GrapeLog
+description: A web application for logging and browsing grape variety tasting notes.
+
+entities:
+  User:
+    authenticable: true
+    properties:
+      - name
+      - { name: email, type: email }
+      - { name: role, type: choice, options: { values: [admin, user], default: user } }
+    policies:
+      create:
+        - access: admin
+      read:
+        - { access: restricted, allow: User, condition: self }
+        - access: admin
+      update:
+        - { access: restricted, allow: User, condition: self }
+        - access: admin
+      delete:
+        - access: admin
+      signup:
+        - access: public
+
+  GrapeVariety:
+    properties:
+      - { name: name, validation: { required: true } }
+      - { name: color, type: choice, options: { values: [Red, White, Rosé] } }
+      - origin
+      - { name: description, type: text }
+      - { name: photo, type: image, options: { sizes: { thumbnail: { width: 400, height: 400 } } } }
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: public
+      update:
+        - access: admin
+      delete:
+        - access: admin
+
+  TastingNote:
+    properties:
+      - { name: rating, type: number, validation: { min: 1, max: 5 } }
+      - { name: vintageYear, type: number }
+      - { name: aromas, type: text }
+      - { name: notes, type: text, validation: { required: true } }
+    belongsTo:
+      - { name: author, entity: User }
+      - { name: grapeVariety, entity: GrapeVariety }
+    policies:
+      create:
+        - { access: restricted, allow: User }
+      read:
+        - access: public
+      update:
+        - { access: restricted, allow: User, condition: self }
+        - access: admin
+      delete:
+        - { access: restricted, allow: User, condition: self }
+        - access: admin
